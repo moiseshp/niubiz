@@ -1,0 +1,14 @@
+.form-group {
+  padding: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.input-niubiz {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+}

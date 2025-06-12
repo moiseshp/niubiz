@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
 
 export default function Home() {
@@ -23,29 +23,26 @@ export default function Home() {
   };
 
   return (
-        
-    <div className="niubiz-payment-form">
+    <div className='niubiz-payment-form'>
       <h2>Pago con Tarjeta</h2>
-      
+
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className='form-group'>
           <label>Número de Tarjeta</label>
-          <div id="txtNumeroTarjeta"></div>
-          {/* {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>} */}
+          <div id='card-number-id' className='input-niubiz' />
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Fecha de Vencimiento (MM/AA)</label>
-            <div id="txtFechaVencimiento"></div>
-            {/* {errors.expiry && <div className="error-message">{errors.expiry}</div>} */}
-          </div>
+        {/* {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>} */}
 
-          <div className="form-group">
-            <label>Código de Seguridad (CVV)</label>
-            <div id="txtCvv"></div>
-            {/* {errors.cvc && <div className="error-message">{errors.cvc}</div>} */}
-          </div>
+        <div className='form-row'>
+          <label>Fecha de Vencimiento (MM/AA)</label>
+          <div id='card-expiry-id' className='input-niubiz' />
+          {/* {errors.expiry && <div className="error-message">{errors.expiry}</div>} */}
+        </div>
+
+        <div className='form-row'>
+          <label>Código de Seguridad (CVV)</label>
+          <div id='card-cvc-id' className='input-niubiz' />
         </div>
 
         {/* <button 
@@ -56,20 +53,16 @@ export default function Home() {
           {isLoading ? 'Procesando...' : `Pagar S/ ${amount.toFixed(2)}`}
         </button> */}
 
-        <button 
-          type="button" 
-          // onClick={resetForm}
-          className="reset-button"
+        {/* <button
+          type='button'
+          onClick={resetForm}
+          className='reset-button'
         >
           Limpiar Formulario
-        </button>
+        </button> */}
       </form>
 
-        {hasError && (
-          <div>
-            Ocurrió un error al cargar el formulario de pago. Por favor, recarga la página.
-          </div>
-        )}
+      {hasError && <div>Ocurrió un error al cargar el formulario de pago. Por favor, recarga la página.</div>}
     </div>
   );
 }

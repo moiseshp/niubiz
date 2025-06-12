@@ -1,6 +1,6 @@
 type LoadNiubizOptions = {
   onLoad: () => void;
-  onError?: (error: ErrorEvent) => void;
+  onError?: (error: any) => void;
 };
 
 export function loadSdk({ onLoad, onError }: LoadNiubizOptions): () => void {
@@ -16,6 +16,7 @@ export function loadSdk({ onLoad, onError }: LoadNiubizOptions): () => void {
     link.rel = 'stylesheet';
     link.href = 'https://pocpaymentserve.s3.amazonaws.com/payform.min.css';
     document.head.appendChild(link);
+  
   }
 
   if (!document.getElementById(scriptId)) {
@@ -24,10 +25,8 @@ export function loadSdk({ onLoad, onError }: LoadNiubizOptions): () => void {
     script.src = 'https://pocpaymentserve.s3.amazonaws.com/payform.min.js';
     script.async = true;
     script.onload = onLoad;
-    script.onerror = (e) => {
-      if (onError) {
-        onError(e);
-      }
+    script.onerror = (e: any) => {
+      if (onError) onError(e);
     };
     document.body.appendChild(script);
   } else {
