@@ -2,8 +2,18 @@
 import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
 
+const configuration = {
+  sessionkey: '9d8d8ed9259b016b652c06ba653da4bb930f76c711da79d65e797f181c3107f3',
+  channel: 'web',
+  merchantid: '110777209',
+  purchasenumber: '12345',
+  amount: 20,
+  language: 'es',
+  font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
+};
+
 export default function Home() {
-  const { isReady, hasError, tokenizeCard } = useNiubiz();
+  const { isReady, hasError, tokenizeCard } = useNiubiz(configuration);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +38,7 @@ export default function Home() {
 
       {!isReady && <div>Cargando...</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: isReady ? 'block' : 'none' }}>
+      <form onSubmit={handleSubmit}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
           <div id='card-number-id' className='input-niubiz' />
@@ -36,13 +46,13 @@ export default function Home() {
 
         {/* {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>} */}
 
-        <div className='form-row'>
+        <div className='form-group'>
           <label>Fecha de Vencimiento (MM/AA)</label>
           <div id='card-expiry-id' className='input-niubiz' />
           {/* {errors.expiry && <div className="error-message">{errors.expiry}</div>} */}
         </div>
 
-        <div className='form-row'>
+        <div className='form-group'>
           <label>Código de Seguridad (CVV)</label>
           <div id='card-cvc-id' className='input-niubiz' />
         </div>

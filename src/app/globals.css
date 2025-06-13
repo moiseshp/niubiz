@@ -1,14 +1,22 @@
-.form-group {
-  padding: 10px;
-}
-
-label {
-  display: block;
-  margin-bottom: 10px;
-}
-
-.input-niubiz {
+.niubiz-payment-form iframe {
   width: 100%;
+}
+.niubiz-payment-form form,
+.niubiz-payment-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.niubiz-payment-form form {
+  gap: 20px;
+}
+
+.niubiz-payment-form .form-group {
+  gap: 10px;
+}
+
+.niubiz-payment-form .input-niubiz {
   padding: 10px;
   border: 1px solid #ccc;
+  border-radius: 8px;
 }

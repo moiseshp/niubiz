@@ -1,30 +1,10 @@
-export const elementStyles = {
-  base: {
-    color: 'blue',
-    fontWeight: 700,
-    fontFamily: "'Montserrat', sans-serif",
-    fontSize: '16px',
-    fontSmoothing: 'antialiased',
-    placeholder: {
-      color: '#999999'
-    },
-    autofill: {
-      color: '#e39f48'
-    }
-  },
-  invalid: {
-    color: '#E25950',
-    '::placeholder': {
-      color: '#FFCCA5'
-    }
-  }
-};
+export const NIUBIZ_FORM_ID = 'niubiz-form';
 
 export const NIUBIZ_FIELDS_CONFIG = {
   sessionkey: 'c2ebd575368adbce4fafa8aea9cf17a9ecc7395b24b888e2a90ff1767c91cde2',
   channel: 'web',
   merchantid: '110777209',
-  amount: 20.0,
+  amount: 20.00,
   purchasenumber: '123456',
   language: 'es',
   countable: true,
@@ -33,7 +13,7 @@ export const NIUBIZ_FIELDS_CONFIG = {
   threeDS: false,
   merchantlogo: 'https://example.com/logo.png',
   form: {
-    // id: NIUBIZ_FORM_ID,
+    id: NIUBIZ_FORM_ID,
     style: {
       backgroundColor: '#fff',
       fontFamily: 'Open Sans',
@@ -59,8 +39,3 @@ export const NIUBIZ_FIELDS_CONFIG = {
     ]
   }
 };
-export interface FormErrors {
-  cardNumber?: string;
-  expiry?: string;
-  cvc?: string;
-}
