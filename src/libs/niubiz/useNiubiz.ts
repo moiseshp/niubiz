@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from '@/libs/niubiz/loadSdk';
 import { NIUBIZ_FIELDS_CONFIG } from '@/libs/niubiz/config';
+import { useNiubizScript } from '@/app/dummy/useNiubizScript';
+import { loadScript } from './loadScript';
 
 export type NiubizHook = {
   isReady: boolean;
@@ -41,6 +43,8 @@ export function useNiubiz(): NiubizHook {
   const [hasError, setHasError] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const isInitialized = useRef(false);
+  const cleanupRef = useRef<() => void>(() => {});
+  const elementsCreated = useRef(false);
 
   const cardNumberRef = useRef<any>(null);
   const cardExpiryRef = useRef<any>(null);
@@ -50,131 +54,88 @@ export function useNiubiz(): NiubizHook {
   const [lastFourDigits, setLastFourDigits] = useState<string | null>(null);
 
   useEffect(() => {
-    const cleanup = loadSdk({
-      onLoad: async () => {
-        if (!window.payform || isInitialized.current) {
-          console.error('Niubiz script not loaded');
-          return;
-        }
-        try {
-          const configuration = {
-            sessionkey: '2a938b038205fd04713907dd0491717ec2c88211bbba2beaacef4f14df83576c',
-            channel: 'web',
-            merchantid: '110777209',
-            purchasenumber: '12345',
-            amount: 20,
-            language: 'es',
-            font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
-          };
+    if (isInitialized.current) return;
+    isInitialized.current = true;
 
-          window.configuration = configuration;
-          // 4474 1183 5563 2240
-          window.payform.setConfiguration(configuration);
-
-          window.cardNumber = await window.payform.createElement(
-            'card-number',
-            { style: elementStyles, placeholder: 'Número de tarjeta' },
-            'card-number-id'
-          );
-
-          // window.cardNumberRef.current = window.cardNumber;
-
-          window.cardNumber.on('installments', (data: any) => {
-            console.info({ data });
-          });
-
-          window.cardNumber.on('change', (data: any[]) => {
-            console.info({ data });
-            // validateCardField(data, 'invalid_number', setCardNumberError);
-            // validateCardField(data, 'invalid_expiry', setCardExpiryError);
-            // validateCardField(data, 'invalid_cvc', setCardCvvError);
-          });
-
-          // cardNumber.on('bin', (data: string) => {
-          //   setBin(data);
-          //   console.log('BIN:', data);
-          // });
-
-          // cardNumber.on('change', (data: any[]) => {
-          //   const newErrors = { ...errors };
-          //   const cardError = data.find(e => e.code === 'invalid_number');
-          //   newErrors.cardNumber = cardError?.message || undefined;
-          //   setErrors(newErrors);
-          // });
-
-          // cardNumber.on('lastFourDigits', (data: string) => {
-          //   setLastFourDigits(data);
-          //   console.log('Últimos 4 dígitos:', data);
-          // });
-
-          window.cardExpiry = await window.payform.createElement(
-            'card-expiry',
-            { style: elementStyles, placeholder: 'MM/YY' },
-            'card-expiry-id'
-          );
-
-          // cardExpiryRef.current = cardExpiry;
-
-          window.cardExpiry.on('change', (data: any[]) => {
-            console.info({ data });
-            // validateCardField(data, 'invalid_expiry', setCardExpiryError);
-          });
-
-          window.cardCvv = await window.payform.createElement(
-            'card-cvc',
-            { style: elementStyles, placeholder: 'CVC' },
-            'card-cvc-id'
-          );
-
-          // cardCvcRef.current = cardCvv;
-
-          window.cardCvv.on('change', (data: any[]) => {
-            console.info({ data });
-            // validateCardField(data, 'invalid_cvc', setCardCvvError);
-          });
-
-          // cardExpiry.on('change', (data: any[]) => {
-          //   const newErrors = { ...errors };
-          //   const expiryError = data.find(e => e.code === 'invalid_expiry');
-          //   newErrors.expiry = expiryError?.message || undefined;
-          //   setErrors(newErrors);
-          // });
-
-          // // Elemento para CVV
-          // const cardCvc = await window.payform.createElement(
-          //   'card-cvc',
-          //   {
-          //     style: elementStyles,
-          //     placeholder: 'CVC'
-          //   },
-          //   'txtCvv'
-          // );
-
-          // cardCvcRef.current = cardCvc;
-
-          // cardCvc.on('change', (data: any[]) => {
-          //   const newErrors = { ...errors };
-          //   const cvcError = data.find(e => e.code === 'invalid_cvc');
-          //   newErrors.cvc = cvcError?.message || undefined;
-          //   setErrors(newErrors);
-          // });
-          isInitialized.current = true;
-          setIsReady(true);
-        } catch (error) {
-          console.error('Error al configurar Niubiz:', error);
-          setHasError(true);
-        }
-      },
-      onError: e => {
-        console.error('No se pudo cargar el SDK de Niubiz:', e);
-        setHasError(true);
-      }
-    });
+    // Cargar script y guardar cleanup
+    cleanupRef.current = loadScript(initializeNiubiz);
 
     return () => {
-      cleanup();
+      // 1. Limpiar elementos de Niubiz (primero desmontar)
+      [cardNumberRef, cardExpiryRef, cardCvcRef].forEach(ref => {
+        ref.current?.unmount?.();
+        ref.current = null;
+      });
+
+      // 2. Resetear estados
+      elementsCreated.current = false;
+      setIsReady(false);
+
+      // 3. Limpiar script (opcional, solo si es necesario removerlo del DOM)
+      cleanupRef.current?.();
     };
   }, []);
+
+  const initializeNiubiz = async () => {
+    if (!window.payform || elementsCreated.current) {
+      console.log('Niubiz script not loaded or elements already created');
+      return;
+    }
+
+    try {
+      if (window.payform.resetSession) {
+        window.payform.resetSession();
+      }
+      const configuration = {
+        sessionkey: '296d275027574f8f1e849455df3a0c2ce06dd34cb50391c0dbf5f4cb213b5f96',
+        channel: 'web',
+        merchantid: '110777209',
+        purchasenumber: '12345',
+        amount: 20,
+        language: 'es',
+        font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
+      };
+
+      // window.configuration = configuration;
+      window.payform.setConfiguration(configuration);
+
+      // Only create elements if they don't exist
+      if (elementsCreated.current) return;
+
+      cardNumberRef.current = await window.payform.createElement(
+        'card-number',
+        {
+          style: elementStyles,
+          placeholder: 'Número de tarjeta'
+        },
+        'card-number-id'
+      );
+
+      cardExpiryRef.current = await window.payform.createElement(
+        'card-expiry',
+        {
+          style: elementStyles,
+          placeholder: 'MM/AA'
+        },
+        'card-expiry-id'
+      );
+
+      cardCvcRef.current = await window.payform.createElement(
+        'card-cvc',
+        {
+          style: elementStyles,
+          placeholder: 'CVV'
+        },
+        'card-cvc-id'
+      );
+
+      elementsCreated.current = true;
+      setIsReady(true);
+    } catch (error) {
+      console.error('Error initializing Niubiz:', error);
+      setHasError(true);
+    }
+  };
 
   const tokenizeCard = async (): Promise<any> => {
     return new Promise((resolve, reject) => {

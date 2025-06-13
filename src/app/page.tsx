@@ -26,7 +26,9 @@ export default function Home() {
     <div className='niubiz-payment-form'>
       <h2>Pago con Tarjeta</h2>
 
-      <form onSubmit={handleSubmit}>
+      {!isReady && <div>Cargando...</div>}
+
+      <form onSubmit={handleSubmit} style={{ display: isReady ? 'block' : 'none' }}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
           <div id='card-number-id' className='input-niubiz' />

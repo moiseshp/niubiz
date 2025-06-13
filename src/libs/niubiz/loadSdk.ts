@@ -7,8 +7,8 @@ export function loadSdk({ onLoad, onError }: LoadNiubizOptions): () => void {
   let script: HTMLScriptElement | null = null;
   let link: HTMLLinkElement | null = null;
 
-  const scriptId = 'niubiz-sdk';
-  const styleId = 'niubiz-style';
+  const scriptId = 'payform-sdk';
+  const styleId = 'payform-styles';
 
   if (!document.getElementById(styleId)) {
     link = document.createElement('link');
@@ -16,7 +16,6 @@ export function loadSdk({ onLoad, onError }: LoadNiubizOptions): () => void {
     link.rel = 'stylesheet';
     link.href = 'https://pocpaymentserve.s3.amazonaws.com/payform.min.css';
     document.head.appendChild(link);
-  
   }
 
   if (!document.getElementById(scriptId)) {
