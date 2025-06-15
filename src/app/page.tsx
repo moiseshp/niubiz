@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
+import { INiubizConfig } from '@/libs/niubiz/utils';
 
-const configuration = {
-  sessionkey: '9d8d8ed9259b016b652c06ba653da4bb930f76c711da79d65e797f181c3107f3',
+const configuration: INiubizConfig = {
+  sessionkey: '694b02e6c443ed70b39066feeb4fad5116c5446fa075121346edfcb9b80aefbe',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: '12345',

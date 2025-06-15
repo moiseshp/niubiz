@@ -1,31 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from '@/libs/niubiz/load-sdk';
-import { elementStyles } from '@/libs/niubiz/config';
+import { elementStyles, INiubizConfig } from '@/libs/niubiz/utils';
 
-export type NiubizHook = {
+interface IReturn {
   isReady: boolean;
   hasError: boolean;
   tokenizeCard: () => Promise<any>;
-};
+}
 
-export function useNiubiz(configuration: any): NiubizHook {
+interface INiubizElement {
+  unmount: () => void;
+}
+
+export function useNiubiz(configuration: INiubizConfig): IReturn {
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const isInitialized = useRef(false);
-  const elementsCreated = useRef(false);
-  const cardNumberRef = useRef<any>(null);
-  const cardExpiryRef = useRef<any>(null);
-  const cardCvcRef = useRef<any>(null);
+  const isSdkInitialized = useRef(false);
+  const cardNumberRef = useRef<INiubizElement | null>(null);
+  const cardExpiryRef = useRef<INiubizElement | null>(null);
+  const cardCvcRef = useRef<INiubizElement | null>(null);
 
-  const initializeNiubiz = async () => {
-    if (!window.payform || elementsCreated.current) {
+  const initialize = async () => {
+    if (!window.payform) {
       console.log('Niubiz script not loaded or elements already created');
       return;
     }
 
     try {
       window.payform.setConfiguration(configuration);
-      if (elementsCreated.current) return;
 
       cardNumberRef.current = await window.payform.createElement(
         'card-number',
@@ -54,7 +56,6 @@ export function useNiubiz(configuration: any): NiubizHook {
         'card-cvc-id'
       );
 
-      elementsCreated.current = true;
       setIsReady(true);
     } catch (error) {
       console.error('Error initializing Niubiz:', error);
@@ -63,20 +64,20 @@ export function useNiubiz(configuration: any): NiubizHook {
   };
 
   useEffect(() => {
-    if (isInitialized.current) return;
-    isInitialized.current = true;
+    if (isSdkInitialized.current) return;
 
-    const cleanup = loadSdk(initializeNiubiz);
+    const cleanup = loadSdk(initialize);
+    isSdkInitialized.current = true;
 
     return () => {
       [cardNumberRef, cardExpiryRef, cardCvcRef].forEach(ref => {
-        ref.current?.unmount?.();
+        if (!ref.current) return;
+        ref.current.unmount?.();
         ref.current = null;
       });
 
-      elementsCreated.current = false;
       setIsReady(false);
-      cleanup?.();
+      cleanup();
     };
   }, []);
 
