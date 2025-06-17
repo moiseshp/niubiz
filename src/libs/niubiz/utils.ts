@@ -1,8 +1,8 @@
-export interface INiubizConfig {
+export interface IConfiguration {
   sessionkey: string;
   channel: string;
   merchantid: string;
-  purchasenumber: string;
+  purchasenumber: number;
   amount: number;
   language: string;
   font: string;

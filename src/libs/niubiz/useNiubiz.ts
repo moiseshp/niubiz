@@ -1,24 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from '@/libs/niubiz/load-sdk';
-import { elementStyles, INiubizConfig } from '@/libs/niubiz/utils';
+import { elementStyles, IConfiguration } from '@/libs/niubiz/utils';
+import { IConfirmCardPaymentResponse } from './types';
 
 interface IReturn {
   isReady: boolean;
   hasError: boolean;
-  tokenizeCard: () => Promise<any>;
+  confirmCardPayment: () => Promise<IConfirmCardPaymentResponse>;
 }
 
-interface INiubizElement {
+interface ICardElement {
   unmount: () => void;
 }
 
-export function useNiubiz(configuration: INiubizConfig): IReturn {
+export function useNiubiz(configuration: IConfiguration): IReturn {
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
   const isSdkInitialized = useRef(false);
-  const cardNumberRef = useRef<INiubizElement | null>(null);
-  const cardExpiryRef = useRef<INiubizElement | null>(null);
-  const cardCvcRef = useRef<INiubizElement | null>(null);
+  const cardNumberRef = useRef<ICardElement | null>(null);
+  const cardExpiryRef = useRef<ICardElement | null>(null);
+  const cardCvcRef = useRef<ICardElement | null>(null);
 
   const initialize = async () => {
     if (!window.payform) {
@@ -63,6 +64,37 @@ export function useNiubiz(configuration: INiubizConfig): IReturn {
     }
   };
 
+  const confirmCardPayment = async (): Promise<IConfirmCardPaymentResponse> => {
+    if (!window.payform) {
+      throw new Error('Niubiz SDK no está disponible.');
+    }
+
+    const userData = {
+      name: 'Juan',
+      lastName: 'Perez',
+      email: 'jperez@test.com'
+    };
+
+    const response = await window.payform.createToken(
+      [cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current],
+      userData
+    );
+
+    console.log(response);
+
+    return {
+      bin: response.bin,
+      transactionToken: response.transactionToken,
+      channel: response.channel
+    };
+
+    // return {
+    //   bin: 'hello',
+    //   transactionToken: 'hello',
+    //   channel: 'web'
+    // };
+  };
+
   useEffect(() => {
     if (isSdkInitialized.current) return;
 
@@ -81,22 +113,5 @@ export function useNiubiz(configuration: INiubizConfig): IReturn {
     };
   }, []);
 
-  const tokenizeCard = async (): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      if (!window.payform) {
-        reject(new Error('Niubiz SDK no está disponible.'));
-        return;
-      }
-
-      window.payform.createToken((response: any) => {
-        if (response.object === 'error') {
-          reject(response);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-  };
-
-  return { isReady, hasError, tokenizeCard };
+  return { isReady, hasError, confirmCardPayment };
 }

@@ -1,20 +1,20 @@
 'use client';
 import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
-import { INiubizConfig } from '@/libs/niubiz/utils';
+import { IConfiguration } from '@/libs/niubiz/utils';
 
-const configuration: INiubizConfig = {
-  sessionkey: '694b02e6c443ed70b39066feeb4fad5116c5446fa075121346edfcb9b80aefbe',
+const configuration: IConfiguration = {
+  sessionkey: 'c8b9580ca8827b231a52a091b6048b6f2cfaf5e26d70e966fa0c9de28e8f876a',
   channel: 'web',
   merchantid: '110777209',
-  purchasenumber: '12345',
+  purchasenumber: 12345,
   amount: 20,
   language: 'es',
   font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
 };
 
 export default function Home() {
-  const { isReady, hasError, tokenizeCard } = useNiubiz(configuration);
+  const { isReady, hasError, confirmCardPayment } = useNiubiz(configuration);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +23,7 @@ export default function Home() {
 
     setIsLoading(true);
     try {
-      const tokenResponse = await tokenizeCard();
+      const tokenResponse = await confirmCardPayment();
       console.log('Token generado:', tokenResponse);
     } catch (error) {
       console.error('Error al tokenizar la tarjeta:', error);

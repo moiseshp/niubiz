@@ -3,7 +3,7 @@ declare global {
   interface Window {
     payform?: {
       setConfiguration: (config: any) => void;
-      createToken: (callback: (response: any) => void) => void;
+      createToken: (callback: (response: IConfirmCardPaymentResponse) => void) => void;
       createElement: (type: string, options: any, containerId?: string) => Promise<any>;
       resetData: (elements: any[]) => void;
       checkout?: {
