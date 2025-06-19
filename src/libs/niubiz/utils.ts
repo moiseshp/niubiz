@@ -1,4 +1,6 @@
-export const elementStyles = {
+import { ICreateElementOptions } from './types';
+
+const ELEMENT_STYLES = {
   base: {
     color: 'blue',
     fontWeight: 700,
@@ -19,3 +21,22 @@ export const elementStyles = {
     }
   }
 };
+
+export const ELEMENT_ID = {
+  cardNumber: 'card-number-id',
+  cardExpiry: 'card-expiry-id',
+  cardCvc: 'card-cvc-id'
+};
+
+export const ELEMENT_TAG = {
+  cardNumber: 'card-number',
+  cardExpiry: 'card-expiry',
+  cardCvc: 'card-cvc'
+};
+
+export function getElementOptions(placeholder: string): ICreateElementOptions {
+  return {
+    style: ELEMENT_STYLES,
+    placeholder
+  };
+}

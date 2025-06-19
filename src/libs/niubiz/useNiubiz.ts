@@ -1,11 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from './load-sdk';
-import { elementStyles } from './utils';
-import { ICardElement, IConfiguration, ICreateTokenResponse, IUseNiubizResponse, IUserCardData } from './types';
+import { ELEMENT_ID, ELEMENT_TAG, getElementOptions } from './utils';
+import {
+  ICardElement,
+  ICardElementEvent,
+  IConfiguration,
+  ICreateTokenResponse,
+  IUseNiubizResponse,
+  IUserCardData
+} from './types';
 
 export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [cardNumber, setCardNumber] = useState({
+    id: ELEMENT_ID.cardNumber,
+    bin: '',
+    lastFourDigits: '',
+    isValid: false,
+    message: ''
+  });
   const cardNumberRef = useRef<ICardElement | null>(null);
   const cardExpiryRef = useRef<ICardElement | null>(null);
   const cardCvcRef = useRef<ICardElement | null>(null);
@@ -21,44 +35,48 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
       window.payform.setConfiguration(configuration);
 
       cardNumberRef.current = await window.payform.createElement(
-        'card-number',
-        {
-          style: elementStyles,
-          placeholder: '**** **** **** ****'
-        },
-        'card-number-id'
+        ELEMENT_TAG.cardNumber,
+        getElementOptions('**** **** **** ****'),
+        ELEMENT_ID.cardNumber
       );
 
       cardExpiryRef.current = await window.payform.createElement(
-        'card-expiry',
-        {
-          style: elementStyles,
-          placeholder: 'MM/AA'
-        },
-        'card-expiry-id'
+        ELEMENT_TAG.cardExpiry,
+        getElementOptions('MM/AA'),
+        ELEMENT_ID.cardExpiry
       );
 
       cardCvcRef.current = await window.payform.createElement(
-        'card-cvc',
-        {
-          style: elementStyles,
-          placeholder: '***'
-        },
-        'card-cvc-id'
+        ELEMENT_TAG.cardCvc,
+        getElementOptions('***'),
+        ELEMENT_ID.cardCvc
       );
 
       cardNumberRef.current?.on('bin', data => {
         console.info({ bin: data });
+        if (!data) return;
+
+        setCardNumber({ ...cardNumber, bin: data as string });
       });
       cardNumberRef.current?.on('change', data => {
-        console.info({ change: data });
+        const [element] = data as ICardElementEvent[];
+        console.info({ element });
+        if (!element) {
+          setCardNumber({ ...cardNumber, isValid: true, message: '' });
+        } else {
+          setCardNumber({
+            ...cardNumber,
+            isValid: element.code !== 'invalid_number',
+            message: element.message
+          });
+        }
       });
-      cardNumberRef.current?.on('dcc', data => {
-        console.info({ dcc: data });
-      });
-      cardNumberRef.current?.on('installments', data => {
-        console.info({ installments: data });
-      });
+      // cardNumberRef.current?.on('dcc', data => {
+      //   console.info({ dcc: data });
+      // });
+      // cardNumberRef.current?.on('installments', data => {
+      //   console.info({ installments: data });
+      // });
       cardNumberRef.current?.on('lastFourDigits', data => {
         console.info({ lastFourDigits: data });
       });
@@ -114,5 +132,10 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
     };
   }, []);
 
-  return { isReady, hasError, createToken };
+  return {
+    isReady,
+    hasError,
+    cardNumber,
+    createToken
+  };
 }

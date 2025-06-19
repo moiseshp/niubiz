@@ -57,7 +57,15 @@ export interface ICardElementEvent {
 export interface IUseNiubizResponse {
   isReady: boolean;
   hasError: boolean;
+  cardNumber: IElement;
   createToken: (data: IUserCardData) => Promise<ICreateTokenResponse>;
+}
+
+export interface IElement {
+  id: string;
+  bin?: string;
+  lastFourDigits?: string | null;
+  isValid: boolean;
 }
 
 export interface IUserCardData {

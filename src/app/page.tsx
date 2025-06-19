@@ -3,8 +3,13 @@ import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
 import { IConfiguration } from '@/libs/niubiz/types';
 
+/**
+ * Para obtener el sessionKey llamar a la solicitud:
+ * /v1/user/order/create-order
+ */
+
 const configuration: IConfiguration = {
-  sessionkey: '1a0ebed7201db8374d8dfb49452ec65f29bc91abaa8c1f9e4ce3ca0ae7e64f71',
+  sessionkey: 'a85fb888ea4bd4f15bcdf0866d6c2a220e5c123f560503bb5b242b1b3b2b94ae',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -14,7 +19,7 @@ const configuration: IConfiguration = {
 };
 
 export default function Home() {
-  const { isReady, hasError, createToken } = useNiubiz(configuration);
+  const { isReady, hasError, cardNumber, createToken } = useNiubiz(configuration);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,8 +30,15 @@ export default function Home() {
 
     setIsLoading(true);
     try {
-      const tokenResponse = await createToken();
-      console.log('Token generado:', tokenResponse);
+      const data = await createToken({
+        name: 'Moises',
+        lastName: 'Huaringa',
+        email: 'moises@huaringa.com'
+      });
+      /**
+       * TODO: Revisar el endpoint de /v1/user/order/complete-order
+       */
+      console.log('Response Create Token:', data);
     } catch (error) {
       console.error('Error al tokenizar la tarjeta:', error);
       // Manejar el error (mostrar mensaje al usuario, etc.)
@@ -44,8 +56,10 @@ export default function Home() {
       <form onSubmit={handleSubmit}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
-          <div id='card-number-id' className='input-niubiz' />
+          <div id={cardNumber.id} className='input-niubiz' />
         </div>
+
+        <code>{JSON.stringify(cardNumber, null, 2)}</code>
 
         {/* {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>} */}
 
