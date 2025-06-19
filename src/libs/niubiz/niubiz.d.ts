@@ -2,13 +2,10 @@
 declare global {
   interface Window {
     payform?: {
-      setConfiguration: (config: any) => void;
-      createToken: (callback: (response: IConfirmCardPaymentResponse) => void) => void;
-      createElement: (type: string, options: any, containerId?: string) => Promise<any>;
-      resetData: (elements: any[]) => void;
-      checkout?: {
-        setup: (options: any) => void;
-      };
+      setConfiguration: (config: IConfiguration) => void;
+      createElement: (type: string, options: ICreateElementOptions, containerId?: string) => Promise<ICardElement>;
+      createToken: (elements: ICardElement[], userCardData: IUserCardData) => Promise<ICreateTokenResponse>;
+      resetData: (elements: ICardElement[]) => void;
     };
   }
 }

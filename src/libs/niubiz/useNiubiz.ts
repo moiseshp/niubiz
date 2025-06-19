@@ -1,29 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-import { loadSdk } from '@/libs/niubiz/load-sdk';
-import { elementStyles, IConfiguration } from '@/libs/niubiz/utils';
-import { IConfirmCardPaymentResponse } from './types';
+import { loadSdk } from './load-sdk';
+import { elementStyles } from './utils';
+import { ICardElement, IConfiguration, ICreateTokenResponse, IUseNiubizResponse, IUserCardData } from './types';
 
-interface IReturn {
-  isReady: boolean;
-  hasError: boolean;
-  confirmCardPayment: () => Promise<IConfirmCardPaymentResponse>;
-}
-
-interface ICardElement {
-  unmount: () => void;
-}
-
-export function useNiubiz(configuration: IConfiguration): IReturn {
+export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const isSdkInitialized = useRef(false);
   const cardNumberRef = useRef<ICardElement | null>(null);
   const cardExpiryRef = useRef<ICardElement | null>(null);
   const cardCvcRef = useRef<ICardElement | null>(null);
+  const isSdkInitialized = useRef(false);
 
   const initialize = async () => {
     if (!window.payform) {
-      console.log('Niubiz script not loaded or elements already created');
+      console.error('Niubiz script not loaded or elements already created');
       return;
     }
 
@@ -34,7 +24,7 @@ export function useNiubiz(configuration: IConfiguration): IReturn {
         'card-number',
         {
           style: elementStyles,
-          placeholder: 'Número de tarjeta'
+          placeholder: '**** **** **** ****'
         },
         'card-number-id'
       );
@@ -52,10 +42,33 @@ export function useNiubiz(configuration: IConfiguration): IReturn {
         'card-cvc',
         {
           style: elementStyles,
-          placeholder: 'CVV'
+          placeholder: '***'
         },
         'card-cvc-id'
       );
+
+      cardNumberRef.current?.on('bin', data => {
+        console.info({ bin: data });
+      });
+      cardNumberRef.current?.on('change', data => {
+        console.info({ change: data });
+      });
+      cardNumberRef.current?.on('dcc', data => {
+        console.info({ dcc: data });
+      });
+      cardNumberRef.current?.on('installments', data => {
+        console.info({ installments: data });
+      });
+      cardNumberRef.current?.on('lastFourDigits', data => {
+        console.info({ lastFourDigits: data });
+      });
+
+      cardExpiryRef.current?.on('change', data => {
+        console.info({ cardExpiryRef: data });
+      });
+      cardCvcRef.current?.on('change', data => {
+        console.info({ cardCvcRef: data });
+      });
 
       setIsReady(true);
     } catch (error) {
@@ -64,35 +77,23 @@ export function useNiubiz(configuration: IConfiguration): IReturn {
     }
   };
 
-  const confirmCardPayment = async (): Promise<IConfirmCardPaymentResponse> => {
+  const createToken = async (userCardData: IUserCardData): Promise<ICreateTokenResponse> => {
     if (!window.payform) {
       throw new Error('Niubiz SDK no está disponible.');
     }
 
-    const userData = {
-      name: 'Juan',
-      lastName: 'Perez',
-      email: 'jperez@test.com'
-    };
-
     const response = await window.payform.createToken(
       [cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current],
-      userData
+      userCardData
     );
 
-    console.log(response);
+    console.info(response);
 
     return {
-      bin: response.bin,
-      transactionToken: response.transactionToken,
-      channel: response.channel
+      bin: response?.bin,
+      transactionToken: response?.transactionToken,
+      channel: response?.channel
     };
-
-    // return {
-    //   bin: 'hello',
-    //   transactionToken: 'hello',
-    //   channel: 'web'
-    // };
   };
 
   useEffect(() => {
@@ -113,5 +114,5 @@ export function useNiubiz(configuration: IConfiguration): IReturn {
     };
   }, []);
 
-  return { isReady, hasError, confirmCardPayment };
+  return { isReady, hasError, createToken };
 }

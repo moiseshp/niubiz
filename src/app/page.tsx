@@ -1,10 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
-import { IConfiguration } from '@/libs/niubiz/utils';
+import { IConfiguration } from '@/libs/niubiz/types';
 
 const configuration: IConfiguration = {
-  sessionkey: 'c8b9580ca8827b231a52a091b6048b6f2cfaf5e26d70e966fa0c9de28e8f876a',
+  sessionkey: '1a0ebed7201db8374d8dfb49452ec65f29bc91abaa8c1f9e4ce3ca0ae7e64f71',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -14,16 +14,18 @@ const configuration: IConfiguration = {
 };
 
 export default function Home() {
-  const { isReady, hasError, confirmCardPayment } = useNiubiz(configuration);
+  const { isReady, hasError, createToken } = useNiubiz(configuration);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.info('isReady');
+    return;
     if (!isReady) return;
 
     setIsLoading(true);
     try {
-      const tokenResponse = await confirmCardPayment();
+      const tokenResponse = await createToken();
       console.log('Token generado:', tokenResponse);
     } catch (error) {
       console.error('Error al tokenizar la tarjeta:', error);
@@ -57,6 +59,8 @@ export default function Home() {
           <label>Código de Seguridad (CVV)</label>
           <div id='card-cvc-id' className='input-niubiz' />
         </div>
+
+        <button type='submit'>Pagar</button>
 
         {/* <button 
           type="submit" 

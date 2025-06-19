@@ -1,19 +1,3 @@
-export interface IConfiguration {
-  sessionkey: string;
-  channel: string;
-  merchantid: string;
-  purchasenumber: number;
-  amount: number;
-  language: string;
-  font: string;
-}
-
-export interface FormErrors {
-  cardNumber?: string;
-  expiry?: string;
-  cvc?: string;
-}
-
 export const elementStyles = {
   base: {
     color: 'blue',
