@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useNiubiz } from '@/libs/niubiz/useNiubiz';
-import { IConfiguration } from '@/libs/niubiz/types';
+import { IConfiguration } from '@/libs/niubiz/utils/types';
 
 /**
  * Para obtener el sessionKey llamar a la solicitud:
@@ -9,7 +9,7 @@ import { IConfiguration } from '@/libs/niubiz/types';
  */
 
 const configuration: IConfiguration = {
-  sessionkey: 'a85fb888ea4bd4f15bcdf0866d6c2a220e5c123f560503bb5b242b1b3b2b94ae',
+  sessionkey: '11fcccf97c153f03f51dc50343845436207f49e4ada04ceeb196b9c924181edf',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -18,27 +18,68 @@ const configuration: IConfiguration = {
   font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
 };
 
+const elementStyles = {
+  base: {
+    color: 'blue',
+    fontWeight: 700,
+    fontFamily: "'Montserrat', sans-serif",
+    fontSize: '16px',
+    fontSmoothing: 'antialiased',
+    placeholder: {
+      color: '#999999'
+    },
+    autofill: {
+      color: '#e39f48'
+    }
+  },
+  invalid: {
+    color: '#E25950',
+    '::-placeholder': {
+      color: '#FFCCA5'
+    }
+  }
+};
+
+const elementInputs = {
+  cardNumber: {
+    placeholder: 'Número de tarjeta',
+    id: 'card-number-id'
+  },
+  cardExpiry: {
+    placeholder: 'MM/AA',
+    id: 'card-expiry-id'
+  },
+  cardCvc: {
+    placeholder: 'CVV',
+    id: 'card-cvc-id'
+  }
+};
+
 export default function Home() {
-  const { isReady, hasError, cardNumber, createToken } = useNiubiz(configuration);
+  const { isReady, error, cardNumber, cardExpiry, cardCvc, createToken } = useNiubiz({
+    configuration,
+    elementStyles,
+    elementInputs
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.info('isReady');
-    return;
+    console.info('isReady', isReady);
     if (!isReady) return;
-
+    if (!cardNumber.isValid || !cardExpiry.isValid || !cardCvc.isValid) return;
+    alert('Go Niubiz!');
     setIsLoading(true);
     try {
-      const data = await createToken({
-        name: 'Moises',
-        lastName: 'Huaringa',
-        email: 'moises@huaringa.com'
-      });
+      // const data = await createToken({
+      //   name: 'Moises',
+      //   lastName: 'Huaringa',
+      //   email: 'moises@huaringa.com'
+      // });
       /**
        * TODO: Revisar el endpoint de /v1/user/order/complete-order
        */
-      console.log('Response Create Token:', data);
+      console.info('Response Create Token:');
     } catch (error) {
       console.error('Error al tokenizar la tarjeta:', error);
       // Manejar el error (mostrar mensaje al usuario, etc.)
@@ -51,12 +92,13 @@ export default function Home() {
     <div className='niubiz-payment-form'>
       <h2>Pago con Tarjeta</h2>
 
+      {error && <div>{error}</div>}
       {!isReady && <div>Cargando...</div>}
 
       <form onSubmit={handleSubmit}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
-          <div id={cardNumber.id} className='input-niubiz' />
+          <div id={elementInputs.cardNumber.id} className='input-niubiz' />
         </div>
 
         <code>{JSON.stringify(cardNumber, null, 2)}</code>
@@ -65,14 +107,18 @@ export default function Home() {
 
         <div className='form-group'>
           <label>Fecha de Vencimiento (MM/AA)</label>
-          <div id='card-expiry-id' className='input-niubiz' />
+          <div id={elementInputs.cardExpiry.id} className='input-niubiz' />
           {/* {errors.expiry && <div className="error-message">{errors.expiry}</div>} */}
         </div>
 
+        <code>{JSON.stringify(cardExpiry, null, 2)}</code>
+
         <div className='form-group'>
           <label>Código de Seguridad (CVV)</label>
-          <div id='card-cvc-id' className='input-niubiz' />
+          <div id={elementInputs.cardCvc.id} className='input-niubiz' />
         </div>
+
+        <code>{JSON.stringify(cardCvc, null, 2)}</code>
 
         <button type='submit'>Pagar</button>
 
@@ -93,7 +139,7 @@ export default function Home() {
         </button> */}
       </form>
 
-      {hasError && <div>Ocurrió un error al cargar el formulario de pago. Por favor, recarga la página.</div>}
+      {error && <div>Ocurrió un error al cargar el formulario de pago. Por favor, recarga la página.</div>}
     </div>
   );
 }

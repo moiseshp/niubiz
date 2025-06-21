@@ -1,97 +1,97 @@
 import { useEffect, useRef, useState } from 'react';
-import { loadSdk } from './load-sdk';
-import { ELEMENT_ID, ELEMENT_TAG, getElementOptions } from './utils';
+import { loadSdk } from './utils/load-sdk';
 import {
+  CardElementErrorType,
+  CardValidationCodes,
+  ElementKey,
   ICardElement,
-  ICardElementEvent,
-  IConfiguration,
+  ICardElementRef,
   ICreateTokenResponse,
+  IUseNiubiz,
   IUseNiubizResponse,
   IUserCardData
-} from './types';
+} from './utils/types';
+import { createCardElement } from './utils/createCardElement';
+import {
+  handleBinEvent,
+  handleLastFourDigitsEvent,
+  handleInstallmentsEvent,
+  handleChangeEvent,
+  handleRemoveErrorEvent
+} from './utils/handleCreateCardEvents';
 
-export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
+const defaultCardState = {
+  error: '',
+  isEmpty: true,
+  bin: undefined,
+  lastFourDigits: undefined
+};
+
+export function useNiubiz({ configuration, elementStyles, elementInputs }: IUseNiubiz): IUseNiubizResponse {
   const [isReady, setIsReady] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [cardNumber, setCardNumber] = useState({
-    id: ELEMENT_ID.cardNumber,
-    bin: '',
-    lastFourDigits: '',
-    isValid: false,
-    message: ''
-  });
-  const cardNumberRef = useRef<ICardElement | null>(null);
-  const cardExpiryRef = useRef<ICardElement | null>(null);
-  const cardCvcRef = useRef<ICardElement | null>(null);
+  const [error, setError] = useState('');
+
+  const [cardNumber, setCardNumber] = useState<ICardElement>(defaultCardState);
+  const [cardExpiry, setCardExpiry] = useState<ICardElement>(defaultCardState);
+  const [cardCvc, setCardCvc] = useState<ICardElement>(defaultCardState);
+
+  const cardNumberRef = useRef<ICardElementRef | null>(null);
+  const cardExpiryRef = useRef<ICardElementRef | null>(null);
+  const cardCvcRef = useRef<ICardElementRef | null>(null);
   const isSdkInitialized = useRef(false);
 
   const initialize = async () => {
     if (!window.payform) {
-      console.error('Niubiz script not loaded or elements already created');
+      setError('Niubiz script not loaded or elements already created');
       return;
     }
 
     try {
       window.payform.setConfiguration(configuration);
 
-      cardNumberRef.current = await window.payform.createElement(
-        ELEMENT_TAG.cardNumber,
-        getElementOptions('**** **** **** ****'),
-        ELEMENT_ID.cardNumber
-      );
-
-      cardExpiryRef.current = await window.payform.createElement(
-        ELEMENT_TAG.cardExpiry,
-        getElementOptions('MM/AA'),
-        ELEMENT_ID.cardExpiry
-      );
-
-      cardCvcRef.current = await window.payform.createElement(
-        ELEMENT_TAG.cardCvc,
-        getElementOptions('***'),
-        ELEMENT_ID.cardCvc
-      );
-
-      cardNumberRef.current?.on('bin', data => {
-        console.info({ bin: data });
-        if (!data) return;
-
-        setCardNumber({ ...cardNumber, bin: data as string });
-      });
-      cardNumberRef.current?.on('change', data => {
-        const [element] = data as ICardElementEvent[];
-        console.info({ element });
-        if (!element) {
-          setCardNumber({ ...cardNumber, isValid: true, message: '' });
-        } else {
-          setCardNumber({
-            ...cardNumber,
-            isValid: element.code !== 'invalid_number',
-            message: element.message
-          });
+      cardNumberRef.current = await createCardElement({
+        placeholder: elementInputs.cardNumber.placeholder,
+        elementKey: ElementKey.CARD_NUMBER,
+        elementId: elementInputs.cardNumber.id,
+        elementStyles,
+        events: {
+          bin: handleBinEvent(setCardNumber),
+          lastFourDigits: handleLastFourDigitsEvent(setCardNumber),
+          installments: handleInstallmentsEvent(setCardNumber),
+          change: handleChangeEvent(setCardNumber, CardValidationCodes.INVALID_NUMBER),
+          'remove-error': handleRemoveErrorEvent(setCardNumber, CardElementErrorType.CARD_NUMBER),
+          'change-card-number': (value: any) => {
+            console.info('change-card-number', value);
+          }
         }
       });
-      // cardNumberRef.current?.on('dcc', data => {
-      //   console.info({ dcc: data });
-      // });
-      // cardNumberRef.current?.on('installments', data => {
-      //   console.info({ installments: data });
-      // });
-      cardNumberRef.current?.on('lastFourDigits', data => {
-        console.info({ lastFourDigits: data });
+
+      cardExpiryRef.current = await createCardElement({
+        placeholder: elementInputs.cardExpiry.placeholder,
+        elementKey: ElementKey.CARD_EXPIRY,
+        elementId: elementInputs.cardExpiry.id,
+        elementStyles,
+        events: {
+          change: handleChangeEvent(setCardExpiry, CardValidationCodes.INVALID_EXPIRY),
+          'remove-error': handleRemoveErrorEvent(setCardExpiry, CardElementErrorType.CARD_EXPIRY)
+        }
       });
 
-      cardExpiryRef.current?.on('change', data => {
-        console.info({ cardExpiryRef: data });
-      });
-      cardCvcRef.current?.on('change', data => {
-        console.info({ cardCvcRef: data });
+      cardCvcRef.current = await createCardElement({
+        placeholder: elementInputs.cardCvc.placeholder,
+        elementKey: ElementKey.CARD_CVC,
+        elementId: elementInputs.cardCvc.id,
+        elementStyles,
+        events: {
+          change: handleChangeEvent(setCardCvc, CardValidationCodes.INVALID_CVC),
+          'remove-error': handleRemoveErrorEvent(setCardCvc, CardElementErrorType.CARD_CVC)
+        }
       });
 
       setIsReady(true);
     } catch (error) {
-      console.error('Error initializing Niubiz:', error);
-      setHasError(true);
+      console.error('Niubiz error:', error);
+      setError('Error initializing Niubiz');
     }
   };
 
@@ -105,7 +105,7 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
       userCardData
     );
 
-    console.info(response);
+    window.payform.resetData([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current]);
 
     return {
       bin: response?.bin,
@@ -122,8 +122,7 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
 
     return () => {
       [cardNumberRef, cardExpiryRef, cardCvcRef].forEach(ref => {
-        if (!ref.current) return;
-        ref.current.unmount?.();
+        ref.current?.unmount?.();
         ref.current = null;
       });
 
@@ -134,8 +133,10 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
 
   return {
     isReady,
-    hasError,
+    error,
     cardNumber,
+    cardExpiry,
+    cardCvc,
     createToken
   };
 }

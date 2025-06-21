@@ -3,9 +3,9 @@ declare global {
   interface Window {
     payform?: {
       setConfiguration: (config: IConfiguration) => void;
-      createElement: (type: string, options: ICreateElementOptions, containerId?: string) => Promise<ICardElement>;
-      createToken: (elements: ICardElement[], userCardData: IUserCardData) => Promise<ICreateTokenResponse>;
-      resetData: (elements: ICardElement[]) => void;
+      createElement: (type: string, options: ICreateElementOptions, containerId?: string) => Promise<ICardElementRef>;
+      createToken: (elements: ICardElementRef[], userCardData: IUserCardData) => Promise<ICreateTokenResponse>;
+      resetData: (elements: ICardElementRef[]) => void;
     };
   }
 }
