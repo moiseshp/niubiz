@@ -1,27 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { loadSdk } from './utils/load-sdk';
-import { createCardElement } from './utils/createCardElement';
+import { loadSdk } from './utils/loadSdk';
+import { initializeNiubizElements } from './utils/initializeNiubizElements';
+import { createNiubizToken } from './utils/createToken';
 import {
-  handleBinEvent,
-  handleLastFourDigitsEvent,
-  handleInstallmentsEvent,
-  handleChangeEvent,
-  handleRemoveErrorEvent
-} from './utils/handleCreateCardEvents';
-import { elementInputs, elementStyles } from './constants';
-import {
-  CardElementKey,
-  CardFieldType,
-  CardValidationCode,
-  ICardElementRef,
   ICardFieldState,
+  IUseNiubizOptions,
+  IUseNiubizResult,
   ICardholderData,
   ICreateTokenResult,
-  IUseNiubizOptions,
-  IUseNiubizResult
+  ICardElementRef
 } from './types';
 
-const defaultCardState = {
+const defaultCardState: ICardFieldState = {
   error: '',
   isValid: false,
   bin: undefined,
@@ -41,81 +31,29 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
   const cardCvcRef = useRef<ICardElementRef | null>(null);
   const isSdkInitialized = useRef(false);
 
-  const initialize = async () => {
-    if (!window.payform) {
-      setError('Niubiz script not loaded or elements already created');
-      return;
-    }
-
-    try {
-      window.payform.setConfiguration(configuration);
-
-      cardNumberRef.current = await createCardElement({
-        placeholder: elementInputs.cardNumber.placeholder,
-        elementKey: CardElementKey.CARD_NUMBER,
-        elementId: elementInputs.cardNumber.id,
-        elementStyles,
-        events: {
-          bin: handleBinEvent(setCardNumber),
-          lastFourDigits: handleLastFourDigitsEvent(setCardNumber),
-          installments: handleInstallmentsEvent(setCardNumber),
-          'change-card-number': handleChangeEvent(setCardNumber, CardValidationCode.INVALID_NUMBER),
-          'remove-error': handleRemoveErrorEvent(setCardNumber, CardFieldType.CARD_NUMBER)
-        }
-      });
-
-      cardExpiryRef.current = await createCardElement({
-        placeholder: elementInputs.cardExpiry.placeholder,
-        elementKey: CardElementKey.CARD_EXPIRY,
-        elementId: elementInputs.cardExpiry.id,
-        elementStyles,
-        events: {
-          change: handleChangeEvent(setCardExpiry, CardValidationCode.INVALID_EXPIRY),
-          'remove-error': handleRemoveErrorEvent(setCardExpiry, CardFieldType.CARD_EXPIRY)
-        }
-      });
-
-      cardCvcRef.current = await createCardElement({
-        placeholder: elementInputs.cardCvc.placeholder,
-        elementKey: CardElementKey.CARD_CVC,
-        elementId: elementInputs.cardCvc.id,
-        elementStyles,
-        events: {
-          change: handleChangeEvent(setCardCvc, CardValidationCode.INVALID_CVC),
-          'remove-error': handleRemoveErrorEvent(setCardCvc, CardFieldType.CARD_CVC)
-        }
-      });
-
-      setIsReady(true);
-    } catch (error) {
-      console.error('Niubiz error:', error);
-      setError('Error initializing Niubiz');
-    }
-  };
-
-  const createToken = async (userCardData: ICardholderData): Promise<ICreateTokenResult> => {
-    if (!window.payform) {
-      throw new Error('Niubiz SDK no está disponible.');
-    }
-
-    const response = await window.payform.createToken(
-      [cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current],
-      userCardData
-    );
-
-    window.payform.resetData([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current]);
-
-    return {
-      bin: response?.bin,
-      transactionToken: response?.transactionToken,
-      channel: response?.channel
-    };
-  };
-
   useEffect(() => {
     if (isSdkInitialized.current) return;
 
-    const cleanup = loadSdk(initialize);
+    const initialize = async () => {
+      try {
+        const {
+          cardNumberRef: num,
+          cardExpiryRef: exp,
+          cardCvcRef: cvc
+        } = await initializeNiubizElements(configuration, setCardNumber, setCardExpiry, setCardCvc);
+
+        cardNumberRef.current = num;
+        cardExpiryRef.current = exp;
+        cardCvcRef.current = cvc;
+
+        setIsReady(true);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to initialize Niubiz elements');
+      }
+    };
+
+    const cleanupSdk = loadSdk(initialize);
     isSdkInitialized.current = true;
 
     return () => {
@@ -125,9 +63,13 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
       });
 
       setIsReady(false);
-      cleanup();
+      cleanupSdk();
     };
-  }, []);
+  }, [configuration]);
+
+  const createToken = async (data: ICardholderData): Promise<ICreateTokenResult> => {
+    return createNiubizToken([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current], data);
+  };
 
   return {
     isReady,
