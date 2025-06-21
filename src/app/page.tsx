@@ -1,15 +1,14 @@
 'use client';
 import { useState } from 'react';
-import { useNiubiz } from '@/libs/niubiz/useNiubiz';
-import { IConfiguration } from '@/libs/niubiz/utils/types';
+import { useNiubiz, INiubizConfiguration, elementInputs } from '@/libs/niubiz';
 
 /**
  * Para obtener el sessionKey llamar a la solicitud:
  * /v1/user/order/create-order
  */
 
-const configuration: IConfiguration = {
-  sessionkey: '11fcccf97c153f03f51dc50343845436207f49e4ada04ceeb196b9c924181edf',
+const configuration: INiubizConfiguration = {
+  sessionkey: '7033cef9815cf93d8e6829773fceb66f46e5265900943983f215eae4bd7da543',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -18,48 +17,9 @@ const configuration: IConfiguration = {
   font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
 };
 
-const elementStyles = {
-  base: {
-    color: 'blue',
-    fontWeight: 700,
-    fontFamily: "'Montserrat', sans-serif",
-    fontSize: '16px',
-    fontSmoothing: 'antialiased',
-    placeholder: {
-      color: '#999999'
-    },
-    autofill: {
-      color: '#e39f48'
-    }
-  },
-  invalid: {
-    color: '#E25950',
-    '::-placeholder': {
-      color: '#FFCCA5'
-    }
-  }
-};
-
-const elementInputs = {
-  cardNumber: {
-    placeholder: 'Número de tarjeta',
-    id: 'card-number-id'
-  },
-  cardExpiry: {
-    placeholder: 'MM/AA',
-    id: 'card-expiry-id'
-  },
-  cardCvc: {
-    placeholder: 'CVV',
-    id: 'card-cvc-id'
-  }
-};
-
 export default function Home() {
   const { isReady, error, cardNumber, cardExpiry, cardCvc, createToken } = useNiubiz({
-    configuration,
-    elementStyles,
-    elementInputs
+    configuration
   });
   const [isLoading, setIsLoading] = useState(false);
 

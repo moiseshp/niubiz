@@ -1,16 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from './utils/load-sdk';
-import {
-  CardElementErrorType,
-  CardValidationCodes,
-  ElementKey,
-  ICardElement,
-  ICardElementRef,
-  ICreateTokenResponse,
-  IUseNiubiz,
-  IUseNiubizResponse,
-  IUserCardData
-} from './utils/types';
 import { createCardElement } from './utils/createCardElement';
 import {
   handleBinEvent,
@@ -19,21 +8,33 @@ import {
   handleChangeEvent,
   handleRemoveErrorEvent
 } from './utils/handleCreateCardEvents';
+import { elementInputs, elementStyles } from './constants';
+import {
+  CardElementKey,
+  CardFieldType,
+  CardValidationCode,
+  ICardElementRef,
+  ICardFieldState,
+  ICardholderData,
+  ICreateTokenResult,
+  IUseNiubizOptions,
+  IUseNiubizResult
+} from './types';
 
 const defaultCardState = {
   error: '',
-  isEmpty: true,
+  isValid: false,
   bin: undefined,
   lastFourDigits: undefined
 };
 
-export function useNiubiz({ configuration, elementStyles, elementInputs }: IUseNiubiz): IUseNiubizResponse {
+export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResult {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState('');
 
-  const [cardNumber, setCardNumber] = useState<ICardElement>(defaultCardState);
-  const [cardExpiry, setCardExpiry] = useState<ICardElement>(defaultCardState);
-  const [cardCvc, setCardCvc] = useState<ICardElement>(defaultCardState);
+  const [cardNumber, setCardNumber] = useState<ICardFieldState>(defaultCardState);
+  const [cardExpiry, setCardExpiry] = useState<ICardFieldState>(defaultCardState);
+  const [cardCvc, setCardCvc] = useState<ICardFieldState>(defaultCardState);
 
   const cardNumberRef = useRef<ICardElementRef | null>(null);
   const cardExpiryRef = useRef<ICardElementRef | null>(null);
@@ -51,40 +52,37 @@ export function useNiubiz({ configuration, elementStyles, elementInputs }: IUseN
 
       cardNumberRef.current = await createCardElement({
         placeholder: elementInputs.cardNumber.placeholder,
-        elementKey: ElementKey.CARD_NUMBER,
+        elementKey: CardElementKey.CARD_NUMBER,
         elementId: elementInputs.cardNumber.id,
         elementStyles,
         events: {
           bin: handleBinEvent(setCardNumber),
           lastFourDigits: handleLastFourDigitsEvent(setCardNumber),
           installments: handleInstallmentsEvent(setCardNumber),
-          change: handleChangeEvent(setCardNumber, CardValidationCodes.INVALID_NUMBER),
-          'remove-error': handleRemoveErrorEvent(setCardNumber, CardElementErrorType.CARD_NUMBER),
-          'change-card-number': (value: any) => {
-            console.info('change-card-number', value);
-          }
+          'change-card-number': handleChangeEvent(setCardNumber, CardValidationCode.INVALID_NUMBER),
+          'remove-error': handleRemoveErrorEvent(setCardNumber, CardFieldType.CARD_NUMBER)
         }
       });
 
       cardExpiryRef.current = await createCardElement({
         placeholder: elementInputs.cardExpiry.placeholder,
-        elementKey: ElementKey.CARD_EXPIRY,
+        elementKey: CardElementKey.CARD_EXPIRY,
         elementId: elementInputs.cardExpiry.id,
         elementStyles,
         events: {
-          change: handleChangeEvent(setCardExpiry, CardValidationCodes.INVALID_EXPIRY),
-          'remove-error': handleRemoveErrorEvent(setCardExpiry, CardElementErrorType.CARD_EXPIRY)
+          change: handleChangeEvent(setCardExpiry, CardValidationCode.INVALID_EXPIRY),
+          'remove-error': handleRemoveErrorEvent(setCardExpiry, CardFieldType.CARD_EXPIRY)
         }
       });
 
       cardCvcRef.current = await createCardElement({
         placeholder: elementInputs.cardCvc.placeholder,
-        elementKey: ElementKey.CARD_CVC,
+        elementKey: CardElementKey.CARD_CVC,
         elementId: elementInputs.cardCvc.id,
         elementStyles,
         events: {
-          change: handleChangeEvent(setCardCvc, CardValidationCodes.INVALID_CVC),
-          'remove-error': handleRemoveErrorEvent(setCardCvc, CardElementErrorType.CARD_CVC)
+          change: handleChangeEvent(setCardCvc, CardValidationCode.INVALID_CVC),
+          'remove-error': handleRemoveErrorEvent(setCardCvc, CardFieldType.CARD_CVC)
         }
       });
 
@@ -95,7 +93,7 @@ export function useNiubiz({ configuration, elementStyles, elementInputs }: IUseN
     }
   };
 
-  const createToken = async (userCardData: IUserCardData): Promise<ICreateTokenResponse> => {
+  const createToken = async (userCardData: ICardholderData): Promise<ICreateTokenResult> => {
     if (!window.payform) {
       throw new Error('Niubiz SDK no está disponible.');
     }

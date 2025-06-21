@@ -2,16 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from './load-sdk';
 import { ELEMENT_ID, ELEMENT_TAG, getElementOptions } from './utils';
 import {
-  CardValidationCodes,
+  CardValidationCode,
   ICardElementRef,
   ICardElementChange,
-  IConfiguration,
-  ICreateTokenResponse,
-  IUseNiubizResponse,
-  IUserCardData
+  INiubizConfiguration,
+  ICreateTokenResult,
+  IUseNiubizResult,
+  ICardholderData
 } from './types';
 
-export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
+export function useNiubiz(configuration: INiubizConfiguration): IUseNiubizResult {
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [cardNumber, setCardNumber] = useState({
@@ -65,7 +65,7 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
         } else {
           setCardNumber({
             ...cardNumber,
-            error: element.code === CardValidationCodes.INVALID_NUMBER ? element.message : ''
+            error: element.code === CardValidationCode.INVALID_NUMBER ? element.message : ''
           });
         }
       });
@@ -87,7 +87,7 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
         } else {
           setCardNumber({
             ...cardNumber,
-            error: element.code === CardValidationCodes.INVALID_EXPIRY ? element.message : ''
+            error: element.code === CardValidationCode.INVALID_EXPIRY ? element.message : ''
           });
         }
       });
@@ -98,7 +98,7 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
         } else {
           setCardNumber({
             ...cardNumber,
-            error: element.code === CardValidationCodes.INVALID_CVC ? element.message : ''
+            error: element.code === CardValidationCode.INVALID_CVC ? element.message : ''
           });
         }
       });
@@ -110,7 +110,7 @@ export function useNiubiz(configuration: IConfiguration): IUseNiubizResponse {
     }
   };
 
-  const createToken = async (userCardData: IUserCardData): Promise<ICreateTokenResponse> => {
+  const createToken = async (userCardData: ICardholderData): Promise<ICreateTokenResult> => {
     if (!window.payform) {
       throw new Error('Niubiz SDK no está disponible.');
     }

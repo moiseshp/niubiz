@@ -1,19 +1,12 @@
-import {
-  CardElementErrorType,
-  CardStateSetter,
-  CardValidationCodes,
-  ElementKey,
-  ICardElementChange,
-  ICardElementError
-} from './types';
+import { CardFieldType, CardFieldStateSetter, CardValidationCode, ICardElementChange, ICardFieldError } from './types';
 
-export function handleBinEvent(setCardState: CardStateSetter) {
+export function handleBinEvent(setCardState: CardFieldStateSetter) {
   return (data: unknown) => {
     setCardState(prev => ({ ...prev, bin: data as string }));
   };
 }
 
-export function handleLastFourDigitsEvent(setCardState: CardStateSetter) {
+export function handleLastFourDigitsEvent(setCardState: CardFieldStateSetter) {
   return (data: unknown) => {
     setCardState(prev => ({
       ...prev,
@@ -24,7 +17,7 @@ export function handleLastFourDigitsEvent(setCardState: CardStateSetter) {
   };
 }
 
-export function handleInstallmentsEvent(setCardState: CardStateSetter) {
+export function handleInstallmentsEvent(setCardState: CardFieldStateSetter) {
   return (data: unknown) => {
     const installments = data as number[];
     setCardState(prev => ({
@@ -34,22 +27,20 @@ export function handleInstallmentsEvent(setCardState: CardStateSetter) {
   };
 }
 
-export function handleRemoveErrorEvent(setCardState: CardStateSetter, elementType: CardElementErrorType) {
+export function handleRemoveErrorEvent(setCardState: CardFieldStateSetter, elementType: CardFieldType) {
   return (data: unknown) => {
-    console.info({ removeError: data });
-    const { type } = data as ICardElementError;
+    const { type } = data as ICardFieldError;
     if (type !== elementType) return;
     setCardState(prev => ({
       ...prev,
-      error: 'Empty input',
-      isEmpty: true
+      error: 'Este campo es requerido',
+      isValid: false
     }));
   };
 }
 
-export function handleChangeEvent(setCardState: CardStateSetter, expectedCode: CardValidationCodes) {
+export function handleChangeEvent(setCardState: CardFieldStateSetter, expectedCode: CardValidationCode) {
   return (data: unknown) => {
-    console.info({ data });
     const allErrors = data as ICardElementChange[];
     if (allErrors.length === 0) {
       setCardState(prev => ({ ...prev, error: '', isValid: true }));
