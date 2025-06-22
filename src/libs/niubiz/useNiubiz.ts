@@ -31,6 +31,8 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
   const cardCvcRef = useRef<ICardElementRef | null>(null);
   const isSdkInitialized = useRef(false);
 
+  const allFieldsValid = cardNumber.isValid && cardExpiry.isValid && cardCvc.isValid;
+
   useEffect(() => {
     if (isSdkInitialized.current) return;
 
@@ -74,9 +76,12 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
   return {
     isReady,
     error,
-    cardNumber,
-    cardExpiry,
-    cardCvc,
-    createToken
+    createToken,
+    fields: {
+      cardNumber,
+      cardExpiry,
+      cardCvc
+    },
+    isValid: allFieldsValid
   };
 }

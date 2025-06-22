@@ -36,8 +36,11 @@ export interface IUseNiubizOptions {
 export interface IUseNiubizResult {
   isReady: boolean;
   error: string;
-  cardNumber: ICardFieldState;
-  cardExpiry: ICardFieldState;
-  cardCvc: ICardFieldState;
   createToken: (data: ICardholderData) => Promise<ICreateTokenResult>;
+  fields: {
+    cardNumber: ICardFieldState;
+    cardExpiry: ICardFieldState;
+    cardCvc: ICardFieldState;
+  };
+  isValid: boolean;
 }

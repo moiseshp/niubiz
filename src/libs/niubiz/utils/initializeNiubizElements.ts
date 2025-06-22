@@ -1,6 +1,6 @@
 import { createCardElement } from '../utils/createCardElement';
 import { CardElementKey, CardFieldType, CardValidationCode, ICardFieldState, ICardElementRef } from '../types';
-import { elementInputs, elementStyles } from '../constants';
+import { elementInputs, elementStyles } from '../config';
 import {
   handleBinEvent,
   handleLastFourDigitsEvent,

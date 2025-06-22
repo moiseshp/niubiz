@@ -8,7 +8,7 @@ import { useNiubiz, INiubizConfiguration, elementInputs } from '@/libs/niubiz';
  */
 
 const configuration: INiubizConfiguration = {
-  sessionkey: '7033cef9815cf93d8e6829773fceb66f46e5265900943983f215eae4bd7da543',
+  sessionkey: '03dba5b16b99c8ca0883ce5d35fb54bac2639da2259fdb42bde886e1df005279',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -18,17 +18,16 @@ const configuration: INiubizConfiguration = {
 };
 
 export default function Home() {
-  const { isReady, error, cardNumber, cardExpiry, cardCvc, createToken } = useNiubiz({
+  const { isReady, error, fields, isValid, createToken } = useNiubiz({
     configuration
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.info('isReady', isReady);
+    console.info('isValid', isValid);
     if (!isReady) return;
-    if (!cardNumber.isValid || !cardExpiry.isValid || !cardCvc.isValid) return;
-    alert('Go Niubiz!');
+    if (!isValid) return;
     setIsLoading(true);
     try {
       // const data = await createToken({
@@ -61,7 +60,7 @@ export default function Home() {
           <div id={elementInputs.cardNumber.id} className='input-niubiz' />
         </div>
 
-        <code>{JSON.stringify(cardNumber, null, 2)}</code>
+        <code>{JSON.stringify(fields.cardNumber, null, 2)}</code>
 
         {/* {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>} */}
 
@@ -71,14 +70,14 @@ export default function Home() {
           {/* {errors.expiry && <div className="error-message">{errors.expiry}</div>} */}
         </div>
 
-        <code>{JSON.stringify(cardExpiry, null, 2)}</code>
+        <code>{JSON.stringify(fields.cardExpiry, null, 2)}</code>
 
         <div className='form-group'>
           <label>Código de Seguridad (CVV)</label>
           <div id={elementInputs.cardCvc.id} className='input-niubiz' />
         </div>
 
-        <code>{JSON.stringify(cardCvc, null, 2)}</code>
+        <code>{JSON.stringify(fields.cardCvc, null, 2)}</code>
 
         <button type='submit'>Pagar</button>
 
