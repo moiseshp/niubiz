@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from './utils/loadSdk';
 import { initializeNiubizElements } from './utils/initializeNiubizElements';
-import { createNiubizToken } from './utils/createToken';
+import { createNiubizToken } from './utils/createNiubizToken';
+import { resetNiubizFields } from './utils/resetNiubizFields';
 import {
   ICardFieldState,
   IUseNiubizOptions,
@@ -69,14 +70,19 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
     };
   }, [configuration]);
 
-  const createToken = async (data: ICardholderData): Promise<ICreateTokenResult> => {
+  const getTransactionToken = async (data: ICardholderData): Promise<ICreateTokenResult> => {
     return createNiubizToken([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current], data);
+  };
+
+  const resetFields = () => {
+    resetNiubizFields([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current]);
   };
 
   return {
     isReady,
     error,
-    createToken,
+    getTransactionToken,
+    resetFields,
     fields: {
       cardNumber,
       cardExpiry,

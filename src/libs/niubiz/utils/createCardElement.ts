@@ -13,7 +13,7 @@ export async function createCardElement({
   events: Record<string, (data: unknown) => void>;
   elementStyles: ICardElementStyles;
 }): Promise<ICardElementRef> {
-  if (!window.payform) return Promise.reject(new Error('Niubiz SDK not loaded'));
+  if (!window.payform) return Promise.reject(new Error('Niubiz SDK is not available'));
 
   const element = await window.payform.createElement(elementKey, { style: elementStyles, placeholder }, elementId);
 

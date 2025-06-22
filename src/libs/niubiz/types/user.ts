@@ -9,7 +9,9 @@ export interface ICardholderData {
   name: string;
   lastName: string;
   email: string;
+  alias: string;
   amount: number;
+  userBlockId: string;
 }
 
 /**
@@ -17,8 +19,14 @@ export interface ICardholderData {
  */
 export interface ICreateTokenResult {
   bin: string;
-  transactionToken: string;
   channel: string;
+  transactionToken: string;
+}
+
+export interface ICreateTokenResultError {
+  data: any;
+  errorCode: number;
+  errorMessage: string;
 }
 
 /**
@@ -36,7 +44,8 @@ export interface IUseNiubizOptions {
 export interface IUseNiubizResult {
   isReady: boolean;
   error: string;
-  createToken: (data: ICardholderData) => Promise<ICreateTokenResult>;
+  getTransactionToken: (data: ICardholderData) => Promise<ICreateTokenResult>;
+  resetFields: () => void;
   fields: {
     cardNumber: ICardFieldState;
     cardExpiry: ICardFieldState;

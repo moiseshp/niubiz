@@ -8,7 +8,7 @@ import { useNiubiz, INiubizConfiguration, elementInputs } from '@/libs/niubiz';
  */
 
 const configuration: INiubizConfiguration = {
-  sessionkey: '03dba5b16b99c8ca0883ce5d35fb54bac2639da2259fdb42bde886e1df005279',
+  sessionkey: '12b55f8d2520c20b23643f31751e08ddb44179cba7d6861b492681b41b392a8c',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -18,7 +18,7 @@ const configuration: INiubizConfiguration = {
 };
 
 export default function Home() {
-  const { isReady, error, fields, isValid, createToken } = useNiubiz({
+  const { isReady, error, fields, isValid, resetFields, getTransactionToken } = useNiubiz({
     configuration
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -30,17 +30,22 @@ export default function Home() {
     if (!isValid) return;
     setIsLoading(true);
     try {
-      // const data = await createToken({
-      //   name: 'Moises',
-      //   lastName: 'Huaringa',
-      //   email: 'moises@huaringa.com'
-      // });
+      const data = await getTransactionToken({
+        name: 'Moises',
+        lastName: 'Huaringa',
+        email: 'prueba.test.sbk93@yopmail.com',
+        amount: 20,
+        alias: 'prueba.test.sbk93@yopmail.com',
+        userBlockId: 'UUID-12346'
+      });
+
+      resetFields();
       /**
        * TODO: Revisar el endpoint de /v1/user/order/complete-order
        */
-      console.info('Response Create Token:');
+      console.info('Response Create Token:', data);
     } catch (error) {
-      console.error('Error al tokenizar la tarjeta:', error);
+      console.error('Error al tokenizar la tarjeta:', { error });
       // Manejar el error (mostrar mensaje al usuario, etc.)
     } finally {
       setIsLoading(false);
@@ -52,9 +57,10 @@ export default function Home() {
       <h2>Pago con Tarjeta</h2>
 
       {error && <div>{error}</div>}
-      {!isReady && <div>Cargando...</div>}
 
-      <form onSubmit={handleSubmit}>
+      {!isReady && <div>Cargando Niubiz form...</div>}
+
+      <form onSubmit={handleSubmit} style={{ display: isReady ? 'block' : 'none' }}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
           <div id={elementInputs.cardNumber.id} className='input-niubiz' />

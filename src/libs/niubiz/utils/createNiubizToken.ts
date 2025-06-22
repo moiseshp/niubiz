@@ -8,12 +8,5 @@ export async function createNiubizToken(
     throw new Error('Niubiz SDK is not available.');
   }
 
-  const response = await window.payform.createToken(refs, data);
-  window.payform.resetData(refs);
-
-  return {
-    bin: response?.bin,
-    transactionToken: response?.transactionToken,
-    channel: response?.channel
-  };
+  return window.payform.createToken(refs, data);
 }
