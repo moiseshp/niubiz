@@ -1,4 +1,4 @@
-import { CardFieldType, CardFieldStateSetter, CardValidationCode, ICardElementChange, ICardFieldError } from './types';
+import { CardFieldType, CardFieldStateSetter, CardValidationCode, ICardElementChange, ICardFieldError } from '../types';
 
 export function handleBinEvent(setCardState: CardFieldStateSetter) {
   return (data: unknown) => {

@@ -1,4 +1,4 @@
-import { ICardElementRef, ICardElementStyles, CardElementKey } from './types';
+import { ICardElementRef, ICardElementStyles, CardElementKey } from '../types';
 
 export async function createCardElement({
   placeholder,
