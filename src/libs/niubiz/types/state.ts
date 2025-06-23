@@ -8,6 +8,7 @@ export interface ICardFieldState {
   isValid: boolean;
   bin?: string;
   lastFourDigits?: string;
+  installments?: number[];
 }
 
 /**

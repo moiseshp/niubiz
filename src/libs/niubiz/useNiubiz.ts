@@ -16,7 +16,8 @@ const defaultCardState: ICardFieldState = {
   error: '',
   isValid: false,
   bin: undefined,
-  lastFourDigits: undefined
+  lastFourDigits: undefined,
+  installments: undefined
 };
 
 export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResult {
