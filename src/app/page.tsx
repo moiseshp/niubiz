@@ -1,24 +1,16 @@
 'use client';
-import { useNiubiz, INiubizConfiguration, elementInputs } from '@/libs/niubiz';
+import { useNiubiz, elementInputs } from '@/libs/niubiz';
+import configuration from './configuration.json';
 
 /**
  * This is a simple example of how to use the Niubiz SDK in a React application.
  *
  * @see {@link https://desarrolladores.niubiz.com.pe/docs/desacoplado#inclusion-del-sdk Niubiz SDK - SDK Inclusion}
  */
-const configuration: INiubizConfiguration = {
-  sessionkey: 'f51e596e658833ab4d3e9365c1d358f0a07bb4d0161c36d88eaeedd5a5c7b127',
-  channel: 'web',
-  merchantid: '110777209',
-  purchasenumber: 12345,
-  amount: 20,
-  language: 'es',
-  font: 'https://fonts.googleapis.com/css?family=Montserrat:400&display=swap'
-};
-
 export default function Home() {
+  const niubiConfigFromApi = configuration;
   const { isReady, error, fields, isValid, resetFields, getTransactionToken } = useNiubiz({
-    configuration
+    configuration: niubiConfigFromApi
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
