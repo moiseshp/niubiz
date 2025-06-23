@@ -56,6 +56,19 @@ export default function Home() {
           {fields.cardCvc.error && <span className='error-message'>{fields.cardCvc.error}</span>}
         </div>
 
+        {Boolean(fields.cardNumber.installments?.length) && (
+          <div className='form-group'>
+            <label>Cuotas</label>
+            <select className='input-niubiz'>
+              {fields.cardNumber.installments?.map(installment => (
+                <option key={installment} value={installment}>
+                  {installment}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <button type='submit' className='submit-button'>
             Pagar
