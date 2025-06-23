@@ -1,12 +1,11 @@
 'use client';
-import { useState } from 'react';
 import { useNiubiz, INiubizConfiguration, elementInputs } from '@/libs/niubiz';
 
 /**
- * Para obtener el sessionKey llamar a la solicitud:
- * /v1/user/order/create-order
+ * This is a simple example of how to use the Niubiz SDK in a React application.
+ *
+ * @see {@link https://desarrolladores.niubiz.com.pe/docs/desacoplado#inclusion-del-sdk Niubiz SDK - SDK Inclusion}
  */
-
 const configuration: INiubizConfiguration = {
   sessionkey: 'f51e596e658833ab4d3e9365c1d358f0a07bb4d0161c36d88eaeedd5a5c7b127',
   channel: 'web',
@@ -21,14 +20,10 @@ export default function Home() {
   const { isReady, error, fields, isValid, resetFields, getTransactionToken } = useNiubiz({
     configuration
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.info('isValid', isValid);
-    if (!isReady) return;
-    if (!isValid) return;
-    setIsLoading(true);
+    if (!isReady || !isValid) return;
     try {
       const data = await getTransactionToken({
         name: 'Moises',
@@ -40,15 +35,9 @@ export default function Home() {
       });
 
       resetFields();
-      /**
-       * TODO: Revisar el endpoint de /v1/user/order/complete-order
-       */
-      console.info('Response Create Token:', data);
+      console.info('getTransactionToken:', data);
     } catch (error) {
       console.error('Error al tokenizar la tarjeta:', { error });
-      // Manejar el error (mostrar mensaje al usuario, etc.)
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -85,7 +74,7 @@ export default function Home() {
         </div>
       </form>
 
-      {error && <div>Ocurrió un error al cargar el formulario de pago. Por favor, recarga la página.</div>}
+      {error && <div className='error-message'>{error}</div>}
     </div>
   );
 }
