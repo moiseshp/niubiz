@@ -1,5 +1,12 @@
 import { createCardElement } from '../utils/createCardElement';
-import { CardElementKey, CardFieldType, CardValidationCode, ICardFieldState, ICardElementRef } from '../types';
+import {
+  CardElementKey,
+  CardFieldType,
+  CardValidationCode,
+  ICardFieldState,
+  ICardElementRef,
+  INiubizConfiguration
+} from '../types';
 import { elementInputs, elementStyles } from '../config';
 import {
   handleBinEvent,
@@ -15,8 +22,15 @@ interface InitResult {
   cardCvcRef: ICardElementRef;
 }
 
+/**
+ * Initializes the Niubiz card elements and attaches event handlers to them.
+ *
+ * @param {INiubizConfiguration} configuration - Configuration object for initializing the Niubiz SDK.
+ * @param {React.Dispatch<React.SetStateAction<ICardFieldState>>} setCardNumber - State setter for the card number field.
+ * @returns {InitResult} Object containing the initialized card element references.
+ */
 export async function initializeNiubizElements(
-  configuration: any,
+  configuration: INiubizConfiguration,
   setCardNumber: React.Dispatch<React.SetStateAction<ICardFieldState>>,
   setCardExpiry: React.Dispatch<React.SetStateAction<ICardFieldState>>,
   setCardCvc: React.Dispatch<React.SetStateAction<ICardFieldState>>

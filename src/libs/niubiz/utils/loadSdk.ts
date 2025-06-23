@@ -3,6 +3,15 @@ const sdk = {
   css: process.env.NEXT_PUBLIC_NIUBIZ_CSS ?? ''
 };
 
+/**
+ * Dynamically loads the Niubiz SDK JavaScript and CSS resources into the document.
+ * Ensures the SDK is available for use in desacoplado integrations.
+ *
+ * @see {@link https://desarrolladores.niubiz.com.pe/docs/desacoplado#inclusion-del-sdk Niubiz SDK - SDK Inclusion}
+ *
+ * @param {() => void} onLoad - Callback function to execute once the SDK has loaded successfully.
+ * @returns {() => void} Cleanup function to remove the SDK script and stylesheet from the DOM.
+ */
 export function loadSdk(onLoad: () => void): () => void {
   const script = document.createElement('script');
   script.src = sdk.js;
