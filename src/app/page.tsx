@@ -8,7 +8,7 @@ import { useNiubiz, INiubizConfiguration, elementInputs } from '@/libs/niubiz';
  */
 
 const configuration: INiubizConfiguration = {
-  sessionkey: '12b55f8d2520c20b23643f31751e08ddb44179cba7d6861b492681b41b392a8c',
+  sessionkey: 'f51e596e658833ab4d3e9365c1d358f0a07bb4d0161c36d88eaeedd5a5c7b127',
   channel: 'web',
   merchantid: '110777209',
   purchasenumber: 12345,
@@ -54,54 +54,35 @@ export default function Home() {
 
   return (
     <div className='niubiz-payment-form'>
-      <h2>Pago con Tarjeta</h2>
-
-      {error && <div>{error}</div>}
-
       {!isReady && <div>Cargando Niubiz form...</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: isReady ? 'block' : 'none' }}>
+      <form onSubmit={handleSubmit} style={{ display: isReady ? 'flex' : 'none' }}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
           <div id={elementInputs.cardNumber.id} className='input-niubiz' />
+          {fields.cardNumber.error && <span className='error-message'>{fields.cardNumber.error}</span>}
         </div>
-
-        <code>{JSON.stringify(fields.cardNumber, null, 2)}</code>
-
-        {/* {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>} */}
 
         <div className='form-group'>
           <label>Fecha de Vencimiento (MM/AA)</label>
           <div id={elementInputs.cardExpiry.id} className='input-niubiz' />
-          {/* {errors.expiry && <div className="error-message">{errors.expiry}</div>} */}
+          {fields.cardExpiry.error && <span className='error-message'>{fields.cardExpiry.error}</span>}
         </div>
-
-        <code>{JSON.stringify(fields.cardExpiry, null, 2)}</code>
 
         <div className='form-group'>
           <label>Código de Seguridad (CVV)</label>
           <div id={elementInputs.cardCvc.id} className='input-niubiz' />
+          {fields.cardCvc.error && <span className='error-message'>{fields.cardCvc.error}</span>}
         </div>
 
-        <code>{JSON.stringify(fields.cardCvc, null, 2)}</code>
-
-        <button type='submit'>Pagar</button>
-
-        {/* <button 
-          type="submit" 
-          disabled={isLoading || Object.values(errors).some(error => error)}
-          className="submit-button"
-        >
-          {isLoading ? 'Procesando...' : `Pagar S/ ${amount.toFixed(2)}`}
-        </button> */}
-
-        {/* <button
-          type='button'
-          onClick={resetForm}
-          className='reset-button'
-        >
-          Limpiar Formulario
-        </button> */}
+        <div>
+          <button type='submit' className='submit-button'>
+            Pagar
+          </button>
+          <button type='button' onClick={resetFields} className='reset-button'>
+            Limpiar Formulario
+          </button>
+        </div>
       </form>
 
       {error && <div>Ocurrió un error al cargar el formulario de pago. Por favor, recarga la página.</div>}

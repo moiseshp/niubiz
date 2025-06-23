@@ -1,3 +1,15 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.niubiz-payment-form {
+  max-width: 380px;
+  margin: 30px auto;
+  border: 1px solid #dadada;
+  padding: 30px;
+  border-radius: 10px;
+}
+
 .niubiz-payment-form iframe {
   width: 100%;
 }
@@ -5,6 +17,7 @@
 .niubiz-payment-form .form-group {
   display: flex;
   flex-direction: column;
+  gap: 30px;
 }
 
 .niubiz-payment-form form {
@@ -13,10 +26,37 @@
 
 .niubiz-payment-form .form-group {
   gap: 10px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .niubiz-payment-form .input-niubiz {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+}
+
+.reset-button {
+  background-color: #fff;
+  color: #333;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.submit-button {
+  background-color: #030303;
+  color: white;
+  border: none;
+  padding: 10px 26px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 10px;
 }
