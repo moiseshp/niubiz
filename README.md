@@ -49,14 +49,17 @@ Use this hook if:
 
 This library is designed to be used with minimal setup. You only need to provide your configuration and mount 3 `<div>`s for the secure fields.
 
-> You can view a full implementation example in the `src/app/page.tsx` directory of this repo.
+> You can view a full implementation example in the `src/app/page.tsx` file of this repo.
 
 ---
 
-## Example Cards (cvv: 123)
+## 📊 Example Cards (cvv: 123)
 
+- 371064649323968 - 03/2028 - 111
+- 5160030000000317 - 03/2028 - 111
+- 4551708161768059 - 03/2028 - 111
 - 4919148107859067
-- 4500340090000016 (Funcionó mejor?)
+- 4500340090000016
 - 4551708161768059
 - 4280820087569434
 - 4634020606098014
