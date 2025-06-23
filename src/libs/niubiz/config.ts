@@ -34,3 +34,5 @@ export const elementInputs = {
     id: 'card-cvc-id'
   }
 };
+
+export const emptyFieldMessage = 'Este campo es requerido';

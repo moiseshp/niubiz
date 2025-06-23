@@ -8,6 +8,7 @@
  * @module NiubizCardEventHandlers
  */
 
+import { emptyFieldMessage } from '../config';
 import { CardFieldType, CardFieldStateSetter, CardValidationCode, ICardElementChange, ICardFieldError } from '../types';
 
 /**
@@ -72,7 +73,7 @@ export function handleRemoveErrorEvent(
     if (type !== elementType) return;
     setCardState(prev => ({
       ...prev,
-      error: 'Este campo es requerido',
+      error: emptyFieldMessage,
       isValid: false
     }));
   };
