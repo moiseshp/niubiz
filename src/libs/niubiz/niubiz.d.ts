@@ -1,7 +1,7 @@
 // Type definitions for the Niubiz SDK global object
 declare global {
   interface Window {
-    payform?: {
+    payform: {
       setConfiguration: (config: INiubizConfiguration) => void;
       createElement: (
         type: string,
