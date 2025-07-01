@@ -66,7 +66,6 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
         ref.current = null;
       });
 
-      setIsLoading(true);
       cleanupSdk();
     };
   }, [configuration]);
