@@ -21,7 +21,7 @@ const defaultCardState: ICardFieldState = {
 };
 
 export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResult {
-  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const [cardNumber, setCardNumber] = useState<ICardFieldState>(defaultCardState);
@@ -49,11 +49,11 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
         cardNumberRef.current = num;
         cardExpiryRef.current = exp;
         cardCvcRef.current = cvc;
-
-        setIsReady(true);
       } catch (err) {
         console.error(err);
         setError('Failed to initialize Niubiz elements');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -66,7 +66,7 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
         ref.current = null;
       });
 
-      setIsReady(false);
+      setIsLoading(true);
       cleanupSdk();
     };
   }, [configuration]);
@@ -80,7 +80,7 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
   };
 
   return {
-    isReady,
+    isLoading,
     error,
     getTransactionToken,
     resetFields,
