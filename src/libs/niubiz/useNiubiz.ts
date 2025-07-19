@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadSdk } from './utils/loadSdk';
 import { initializeNiubizElements } from './utils/initializeNiubizElements';
-import { createNiubizToken } from './utils/createNiubizToken';
-import { resetNiubizFields } from './utils/resetNiubizFields';
-import {
-  ICardFieldState,
-  IUseNiubizOptions,
-  IUseNiubizResult,
-  ICardholderData,
-  ICreateTokenResult,
-  ICardElementRef
-} from './types';
+import { niubizService } from './NiubizService';
+import { ICardFieldState, IUseNiubizOptions, IUseNiubizResult } from './types';
 
 const defaultCardState: ICardFieldState = {
   error: '',
@@ -21,18 +13,14 @@ const defaultCardState: ICardFieldState = {
 };
 
 export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResult {
-  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [cardNumber, setCardNumber] = useState<ICardFieldState>(defaultCardState);
   const [cardExpiry, setCardExpiry] = useState<ICardFieldState>(defaultCardState);
   const [cardCvc, setCardCvc] = useState<ICardFieldState>(defaultCardState);
 
-  const cardNumberRef = useRef<ICardElementRef | null>(null);
-  const cardExpiryRef = useRef<ICardElementRef | null>(null);
-  const cardCvcRef = useRef<ICardElementRef | null>(null);
   const isSdkInitialized = useRef(false);
-
   const allFieldsValid = cardNumber.isValid && cardExpiry.isValid && cardCvc.isValid;
 
   useEffect(() => {
@@ -46,14 +34,16 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
           cardCvcRef: cvc
         } = await initializeNiubizElements(configuration, setCardNumber, setCardExpiry, setCardCvc);
 
-        cardNumberRef.current = num;
-        cardExpiryRef.current = exp;
-        cardCvcRef.current = cvc;
-
-        setIsReady(true);
+        niubizService.setRefs({
+          cardNumber: num,
+          cardExpiry: exp,
+          cardCvc: cvc
+        });
       } catch (err) {
         console.error(err);
         setError('Failed to initialize Niubiz elements');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -61,29 +51,13 @@ export function useNiubiz({ configuration }: IUseNiubizOptions): IUseNiubizResul
     isSdkInitialized.current = true;
 
     return () => {
-      [cardNumberRef, cardExpiryRef, cardCvcRef].forEach(ref => {
-        ref.current?.unmount?.();
-        ref.current = null;
-      });
-
-      setIsReady(false);
       cleanupSdk();
     };
   }, [configuration]);
 
-  const getTransactionToken = async (data: ICardholderData): Promise<ICreateTokenResult> => {
-    return createNiubizToken([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current], data);
-  };
-
-  const resetFields = () => {
-    resetNiubizFields([cardNumberRef.current, cardExpiryRef.current, cardCvcRef.current]);
-  };
-
   return {
-    isReady,
+    isLoading,
     error,
-    getTransactionToken,
-    resetFields,
     fields: {
       cardNumber,
       cardExpiry,

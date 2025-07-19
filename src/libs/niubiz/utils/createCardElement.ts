@@ -25,19 +25,21 @@ import { ICardElementRef, ICardElementStyles, CardElementKey } from '../types';
  * @throws {Error} If the Niubiz SDK is not available in the global `window` object.
  */
 
+interface ICreateCardElement {
+  placeholder: string;
+  elementKey: CardElementKey;
+  elementId: string;
+  events: Record<string, (data: unknown) => void>;
+  elementStyles: ICardElementStyles;
+}
+
 export async function createCardElement({
   placeholder,
   elementKey,
   elementId,
   events,
   elementStyles
-}: {
-  placeholder: string;
-  elementKey: CardElementKey;
-  elementId: string;
-  events: Record<string, (data: unknown) => void>;
-  elementStyles: ICardElementStyles;
-}): Promise<ICardElementRef> {
+}: ICreateCardElement): Promise<ICardElementRef> {
   if (!window.payform) return Promise.reject(new Error('Niubiz SDK is not available'));
 
   const element = await window.payform.createElement(elementKey, { style: elementStyles, placeholder }, elementId);

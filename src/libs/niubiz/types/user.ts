@@ -42,10 +42,8 @@ export interface IUseNiubizOptions {
  * Values returned by the Niubiz integration hook.
  */
 export interface IUseNiubizResult {
-  isReady: boolean;
+  isLoading: boolean;
   error: string;
-  getTransactionToken: (data: ICardholderData) => Promise<ICreateTokenResult>;
-  resetFields: () => void;
   fields: {
     cardNumber: ICardFieldState;
     cardExpiry: ICardFieldState;

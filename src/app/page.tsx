@@ -1,6 +1,6 @@
 'use client';
-import { useNiubiz, elementInputs } from '@/libs/niubiz';
-import configuration from './configuration.json';
+import { useNiubiz, elementInputs, defaultConfiguration } from '@/libs/niubiz';
+import { niubizService } from '@/libs/niubiz/NiubizService';
 
 /**
  * This is a simple example of how to use the Niubiz SDK in a React application.
@@ -8,16 +8,15 @@ import configuration from './configuration.json';
  * @see {@link https://desarrolladores.niubiz.com.pe/docs/desacoplado#inclusion-del-sdk Niubiz SDK - SDK Inclusion}
  */
 export default function Home() {
-  const niubiConfigFromApi = configuration;
-  const { isReady, error, fields, isValid, resetFields, getTransactionToken } = useNiubiz({
-    configuration: niubiConfigFromApi
+  const { isLoading, error, fields, isValid } = useNiubiz({
+    configuration: defaultConfiguration
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isReady || !isValid) return;
+    if (isLoading || !isValid) return;
     try {
-      const data = await getTransactionToken({
+      const data = await niubizService.createToken({
         name: 'Moises',
         lastName: 'Huaringa',
         email: 'prueba.test.sbk93@yopmail.com',
@@ -26,8 +25,8 @@ export default function Home() {
         userBlockId: 'UUID-12346'
       });
 
-      resetFields();
-      console.info('getTransactionToken:', data);
+      console.info('transactionToken:', data);
+      niubizService.resetFields();
     } catch (error) {
       console.error('Error al tokenizar la tarjeta:', { error });
     }
@@ -35,9 +34,9 @@ export default function Home() {
 
   return (
     <div className='niubiz-payment-form'>
-      {!isReady && <div>Cargando Niubiz form...</div>}
+      {isLoading && <div>Cargando Niubiz form...</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: isReady ? 'flex' : 'none' }}>
+      <form onSubmit={handleSubmit} style={{ display: isLoading ? 'none' : 'flex' }}>
         <div className='form-group'>
           <label>Número de Tarjeta</label>
           <div id={elementInputs.cardNumber.id} className='input-niubiz' />
@@ -73,7 +72,7 @@ export default function Home() {
           <button type='submit' className='submit-button'>
             Pagar
           </button>
-          <button type='button' onClick={resetFields} className='reset-button'>
+          <button type='button' onClick={() => niubizService.resetFields()} className='reset-button'>
             Limpiar Formulario
           </button>
         </div>
